@@ -21,7 +21,6 @@ const userSchema: Schema<IUser> = new Schema(
       default: "user",
     },
     password: { type: String, required: true },
-    accessToken: { type: String },
   },
   {
     timestamps: true,

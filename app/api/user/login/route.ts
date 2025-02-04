@@ -9,6 +9,7 @@ export const POST = async (request: NextRequest) => {
     await connectDb();
     const req = await request.json();
     const { email, password } = req;
+
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -18,7 +19,7 @@ export const POST = async (request: NextRequest) => {
       );
     }
 
-    const isPasswordValid = await bcryptjs.compare(password, user.Password);
+    const isPasswordValid = await bcryptjs.compare(password, user.password);
 
     if (!isPasswordValid) {
       return NextResponse.json({ error: "Wrong password." }, { status: 400 });
@@ -35,7 +36,7 @@ export const POST = async (request: NextRequest) => {
 
     const token = jwt.sign(tokenData, process.env.TOKEN_SECRET);
     const response = NextResponse.json(
-      { message: "User logged in successfully." },
+      { message: token }, //"User logged in successfully."
       { status: 200 }
     );
 
