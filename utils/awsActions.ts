@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getJwtData } from "./getJwtData";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const s3 = new S3Client({
@@ -11,12 +15,12 @@ const s3 = new S3Client({
   },
 });
 
-export async function getVideoUrl(request: NextRequest) {
-  const generateRandomKey = () => crypto.randomUUID();
+export async function putVideoUrl(request: NextRequest) {
+  //   const generateRandomKey = () => crypto.randomUUID();
 
   const putObjectCommand = new PutObjectCommand({
     Bucket: process.env.AWS_BUCKET_NAME,
-    Key: generateRandomKey(),
+    Key: "encrypted-video-1",
   });
 
   const signedUrl = await getSignedUrl(s3, putObjectCommand, {
@@ -24,4 +28,14 @@ export async function getVideoUrl(request: NextRequest) {
   });
 
   return { url: signedUrl };
+}
+
+export async function getVideoUrl(request: NextRequest) {
+  const downloadCommand = new GetObjectCommand({
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: "encrypted-video",
+  });
+
+  // const data = await s3.send(downloadCommand)
+  // const encryptedBuffer = await streamToBuffer
 }
