@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -9,18 +10,20 @@ export default function Home() {
           Auth Demo
         </span>
       </h1>
-
       <p className="text-gray-400 text-center mb-8 max-w-lg">
         A modern authentication example with a beautiful dark theme interface
       </p>
-
       <div className="flex gap-4">
-        <button className="px-6 py-2 bg-white text-black rounded-md hover:bg-gray-100 transition-colors">
-          Login
-        </button>
-        <button className="px-6 py-2 border border-gray-700 text-white rounded-md hover:bg-gray-800 transition-colors">
-          Sign up
-        </button>
+        <Link href={"/login"}>
+          <button className="px-6 py-2 bg-white text-black rounded-md hover:bg-gray-100 transition-colors">
+            Login
+          </button>
+        </Link>
+        <Link href={"/signup"}>
+          <button className="px-6 py-2 border border-gray-700 text-white rounded-md hover:bg-gray-800 transition-colors">
+            Sign up
+          </button>
+        </Link>
       </div>
     </div>
   );
