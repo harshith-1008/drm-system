@@ -8,6 +8,7 @@ export const POST = async (request: NextRequest) => {
   try {
     await connectDb();
     const req = await request.json();
+
     const { email, password, deviceFingerprint } = req;
     const user = await User.findOne({ email });
 

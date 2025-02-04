@@ -39,7 +39,6 @@ export default function LessonView() {
         });
         const data = await res.json();
         if (res.ok) {
-          // console.log(data);
           setVideoData(data.data);
           setVideoLink(data.data.bucketLink);
         } else {
@@ -52,7 +51,7 @@ export default function LessonView() {
 
     if (videoId) fetchVideo();
   }, [videoId]);
-  // console.log(videoData);
+
   const videoPlayerOptions = {
     controls: true,
     responsive: true,
@@ -61,21 +60,49 @@ export default function LessonView() {
       {
         src: videoLink,
         type: "application/x-mpegURL",
-        withCredentials: true, // Set to true if your API requires authentication
+        withCredentials: true,
       },
     ],
+    userActions: {
+      doubleClick: true,
+      hotkeys: false,
+    },
+    controlbar: {
+      fullScreenToggle: true,
+      playToggle: true,
+    },
   };
+
   const handlePlayerReady = (player: any) => {
     playerRef.current = player;
-
-    // player.on("waiting", () => {
-    //   videojs.log("player is waiting");
-    // });
-
-    // player.on("dispose", () => {
-    //   videojs.log("player will dispose");
-    // });
   };
+
+  useEffect(() => {
+    const disableRightClick = (event: MouseEvent) => event.preventDefault();
+    const disableShortcuts = (event: KeyboardEvent) => {
+      if (
+        event.ctrlKey &&
+        (event.key === "u" ||
+          event.key === "s" ||
+          event.key === "i" ||
+          event.key === "j" ||
+          event.key === "c")
+      ) {
+        event.preventDefault();
+      }
+      if (event.key === "F12") {
+        event.preventDefault();
+      }
+    };
+
+    document.addEventListener("contextmenu", disableRightClick);
+    document.addEventListener("keydown", disableShortcuts);
+
+    return () => {
+      document.removeEventListener("contextmenu", disableRightClick);
+      document.removeEventListener("keydown", disableShortcuts);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#020817] text-white p-6">

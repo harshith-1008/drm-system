@@ -1,10 +1,12 @@
 import React, { useRef, useEffect } from "react";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
+
 export const VideoPlayer = (props: any) => {
   const videoRef = useRef(null);
   const playerRef = useRef(null);
   const { options, onReady } = props;
+
   useEffect(() => {
     if (!playerRef.current) {
       const videoElement = document.createElement("video-js");
@@ -20,6 +22,7 @@ export const VideoPlayer = (props: any) => {
       player.src(options.sources);
     }
   }, [options, videoRef]);
+
   useEffect(() => {
     const player = playerRef.current;
     return () => {
@@ -29,8 +32,9 @@ export const VideoPlayer = (props: any) => {
       }
     };
   }, [playerRef]);
+
   return (
-    <div data-vjs-player style={{ width: "600px" }}>
+    <div data-vjs-player className="w-full">
       <div ref={videoRef} />
     </div>
   );
