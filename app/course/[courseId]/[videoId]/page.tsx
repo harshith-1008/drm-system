@@ -1,4 +1,9 @@
-import { ChevronLeft, Play, Maximize2, Clock } from "lucide-react";
+"use client";
+
+import * as React from "react";
+import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { ChevronLeft, Clock } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import {
   Select,
@@ -7,6 +12,9 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import VideoPlayer from "@/components/videojsPlayer";
+import "video.js/dist/video-js.css";
+import { useRef, useEffect, useState } from "react";
 
 export default function LessonView() {
   const playerRef = useRef(null);
@@ -71,21 +79,28 @@ export default function LessonView() {
 
   return (
     <div className="min-h-screen bg-[#020817] text-white p-6">
-      {/* Header */}
       <div className="max-w-7xl mx-auto flex justify-between items-center mb-8">
         <div className="flex items-center gap-4">
-          <button className="text-gray-400 hover:text-white transition-colors ">
+          <button className="text-gray-400 hover:text-white transition-colors">
             <ChevronLeft className="h-6 w-6" />
           </button>
           <div>
-            <Link href="/course/introduction-to-ui-ux">
-              <h2 className="text-2xl font-semibold ">Introduction to UI/UX</h2>
-            </Link>
+            <h1 className="text-2xl font-semibold">UI/UX Development</h1>
           </div>
+          <Select defaultValue="week1">
+            <SelectTrigger className="w-[120px] bg-gray-900/50 border-gray-800">
+              <SelectValue placeholder="Select week" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="week1">Week 1</SelectItem>
+              <SelectItem value="week2">Week 2</SelectItem>
+              <SelectItem value="week3">Week 3</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <Avatar className="h-12 w-12">
           <img
-            src="https://randomuser.me/api/portraits/men/75.jpg"
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-02-04%20at%2011.43.58%E2%80%AFAM-3n2FuAQu4u3tro7fh9uhFhGct34e29.png"
             alt="User"
             className="rounded-full"
           />
@@ -130,40 +145,29 @@ export default function LessonView() {
             </div>
           </div>
           <div className="space-y-8">
-            <div className="relative bg-violet-700 rounded-lg overflow-hidden">
-              <div className="absolute top-4 left-4 flex items-center gap-2">
-                <Avatar className="h-8 w-8">
-                  <img
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-02-04%20at%2011.43.58%E2%80%AFAM-3n2FuAQu4u3tro7fh9uhFhGct34e29.png"
-                    alt="Instructor"
-                    className="rounded-full"
-                  />
-                </Avatar>
-                <span className="text-sm">Sai Harshith</span>
-              </div>
-              <div className="absolute top-4 right-4 bg-black/50 px-3 py-1 rounded-full text-sm">
-                Learn UI/UX design essentials
-              </div>
-              <img
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-02-04%20at%2011.43.58%E2%80%AFAM-3n2FuAQu4u3tro7fh9uhFhGct34e29.png"
-                alt="Course Video"
-                className="w-full aspect-video object-cover"
-              />
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                <div className="flex items-center justify-between">
-                  <button className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                    <Play className="h-6 w-6" />
-                  </button>
-                  <div className="flex-1 mx-4">
-                    <div className="h-1 bg-gray-600 rounded-full">
-                      <div className="h-full w-2/3 bg-red-500 rounded-full" />
-                    </div>
-                  </div>
-                  <button className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                    <Maximize2 className="h-6 w-6" />
-                  </button>
-                </div>
-              </div>
+            <div className="relative bg-violet-700 rounded-lg overflow-hidden h-[18rem]">
+              {/* <VideoPlayer
+                options={{
+                  controls: true,
+                  responsive: true,
+                  fluid: true,
+                  sources: [
+                    {
+                      src: "https://drm-system-hackatho.s3.ap-south-2.amazonaws.com/a863daf9-3526-4571-a5ce-ed496b187905", // The encrypted M3U8 link
+                      type: "application/x-mpegURL",
+                    },
+                  ],
+                }}
+                onReady={(player) => {
+                  console.log("Player is ready", player);
+                }}
+              /> */}
+              {videoLink && (
+                <VideoPlayer
+                  options={videoPlayerOptions}
+                  onReady={handlePlayerReady}
+                />
+              )}
             </div>
             <div className="space-y-6">
               <h3 className="text-xl font-semibold">Key Points</h3>
