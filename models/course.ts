@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface ICourse extends Document {
   name: string;
+  description: string;
   price: number;
   adminId: mongoose.Types.ObjectId;
 }
@@ -9,6 +10,10 @@ export interface ICourse extends Document {
 const courseSchema: Schema<ICourse> = new Schema(
   {
     name: {
+      type: String,
+      required: true,
+    },
+    description: {
       type: String,
       required: true,
     },

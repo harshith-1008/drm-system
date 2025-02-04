@@ -51,7 +51,7 @@ export const POST = async (request: NextRequest) => {
     const iv = process.env.IV;
 
     const keyInfoPath = path.join("/tmp", "key_info.txt");
-    const keyInfoContent = `key.key\nfile:${keyPath}\n${iv}`;
+    const keyInfoContent = `http://localhost:3000/api/get-keys\nfile:${keyPath}\n${iv}`;
     fs.writeFileSync(keyInfoPath, keyInfoContent);
 
     const encryptedPath = path.join("/tmp", `encrypted-${timestamp}.m3u8`);
@@ -64,16 +64,25 @@ export const POST = async (request: NextRequest) => {
       );
     }
 
+    const WatermarkText = "Hello";
+
     await new Promise<void>((resolve, reject) => {
       ffmpeg(inputPath)
         .outputOptions("-c:v libx264")
         .outputOptions("-preset ultrafast")
+        .outputOptions(
+          `-vf drawtext=text='${WatermarkText.replace(
+            /'/g,
+            "\\'"
+          )}':fontfile='/System/Library/Fonts/HelveticaNeue.ttc':fontcolor=white:fontsize=24:x=10:y=10`
+        )
         .outputOptions("-f hls")
         .outputOptions("-hls_time 10")
         .outputOptions("-hls_list_size 0")
         .outputOptions(`-hls_key_info_file ${keyInfoPath}`)
         .outputOptions(`-hls_segment_filename ${segmentPath}`)
         .output(encryptedPath)
+        .on("stderr", (line) => console.log("stderr:", line))
         .on("end", () => resolve())
         .on("error", (err) => reject(err))
         .run();
@@ -88,16 +97,16 @@ export const POST = async (request: NextRequest) => {
       body: encryptedBuffer,
     });
 
-    let hashedIV;
-    if (iv) {
-      hashedIV = await bcryptjs.hash(iv, salt);
-    }
+    // let hashedIV;
+    // if (iv) {
+    //   hashedIV = await bcryptjs.hash(iv, salt);
+    // }
     const newVideo = await Video.create({
       title: title,
       adminId: user.id,
-      bucketLink: `https://${process.env.AWS_BUCKET_NAME}.s3.amazonaws.com/${key}`,
-      decryptionCode: hashedEncryptionKey,
-      iv: hashedIV,
+      bucketLink: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_BUCKET_REGION}.amazonaws.com/${key}.m3u8`,
+      decryptionCode: encryptionKeyValue,
+      iv: iv,
     });
 
     fs.rmSync(inputPath, { force: true });

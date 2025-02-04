@@ -22,7 +22,7 @@ export async function putVideoUrl() {
 
   const putObjectCommand = new PutObjectCommand({
     Bucket: process.env.AWS_BUCKET_NAME,
-    Key: key,
+    Key: `${key}.m3u8`,
   });
 
   const signedUrl = await getSignedUrl(s3, putObjectCommand, {
