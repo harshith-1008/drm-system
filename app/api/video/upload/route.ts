@@ -65,7 +65,8 @@ export const POST = async (request: NextRequest) => {
     }
 
     const WatermarkText = "Hello";
-
+    const generateRandomKey = () => crypto.randomUUID();
+    const key2 = generateRandomKey();
     await new Promise<void>((resolve, reject) => {
       ffmpeg(inputPath)
         .outputOptions("-c:v libx264")
@@ -88,31 +89,44 @@ export const POST = async (request: NextRequest) => {
         .run();
     });
 
-    const encryptedBuffer = fs.readFileSync(encryptedPath);
+    // Upload .ts files
+    const tsFiles = fs
+      .readdirSync("/tmp")
+      .filter((file) => file.startsWith("segment-") && file.endsWith(".ts"));
+    console.log("TS Files Found:", tsFiles);
+    for (const tsFile of tsFiles) {
+      const tsBuffer = fs.readFileSync(path.join("/tmp", tsFile));
+      const { url } = await putVideoUrl("ts", key2, tsFile);
+      await fetch(url!, {
+        method: "PUT",
+        body: tsBuffer,
+      });
+    }
 
-    const { url, key } = await putVideoUrl();
+    const encryptedBuffer = fs.readFileSync(encryptedPath);
+    const { url } = await putVideoUrl("playlist", key2);
 
     await fetch(url!, {
       method: "PUT",
       body: encryptedBuffer,
     });
 
-    // let hashedIV;
-    // if (iv) {
-    //   hashedIV = await bcryptjs.hash(iv, salt);
-    // }
     const newVideo = await Video.create({
       title: title,
       adminId: user.id,
-      bucketLink: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_BUCKET_REGION}.amazonaws.com/${key}.m3u8`,
+      bucketLink: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_BUCKET_REGION}.amazonaws.com/${key2}/playlist`,
       decryptionCode: encryptionKeyValue,
       iv: iv,
     });
 
+    // Clean up
     fs.rmSync(inputPath, { force: true });
     fs.rmSync(keyPath, { force: true });
     fs.rmSync(keyInfoPath, { force: true });
     fs.rmSync(encryptedPath, { force: true });
+    tsFiles.forEach((file) =>
+      fs.rmSync(path.join("/tmp", file), { force: true })
+    );
 
     return NextResponse.json(
       {

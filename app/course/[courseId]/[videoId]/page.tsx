@@ -28,7 +28,6 @@ export default function LessonView() {
   useEffect(() => {
     const fetchVideo = async () => {
       try {
-        console.log(videoId);
         const res = await fetch(`/api/video/getVideo`, {
           method: "POST",
           headers: {
@@ -40,7 +39,7 @@ export default function LessonView() {
         });
         const data = await res.json();
         if (res.ok) {
-          console.log(data);
+          // console.log(data);
           setVideoData(data.data);
           setVideoLink(data.data.bucketLink);
         } else {
@@ -53,7 +52,7 @@ export default function LessonView() {
 
     if (videoId) fetchVideo();
   }, [videoId]);
-  console.log(videoData);
+  // console.log(videoData);
   const videoPlayerOptions = {
     controls: true,
     responsive: true,
@@ -69,13 +68,13 @@ export default function LessonView() {
   const handlePlayerReady = (player: any) => {
     playerRef.current = player;
 
-    player.on("waiting", () => {
-      videojs.log("player is waiting");
-    });
+    // player.on("waiting", () => {
+    //   videojs.log("player is waiting");
+    // });
 
-    player.on("dispose", () => {
-      videojs.log("player will dispose");
-    });
+    // player.on("dispose", () => {
+    //   videojs.log("player will dispose");
+    // });
   };
 
   return (
@@ -147,14 +146,14 @@ export default function LessonView() {
           </div>
           <div className="space-y-8">
             <div className="relative bg-violet-700 rounded-lg overflow-hidden h-[18rem]">
-              <VideoPlayer
+              {/* <VideoPlayer
                 options={{
                   controls: true,
                   responsive: true,
                   fluid: true,
                   sources: [
                     {
-                      src: videoLink, // The encrypted M3U8 link
+                      src: "https://drm-system-hackatho.s3.ap-south-2.amazonaws.com/a863daf9-3526-4571-a5ce-ed496b187905", // The encrypted M3U8 link
                       type: "application/x-mpegURL",
                     },
                   ],
@@ -162,7 +161,13 @@ export default function LessonView() {
                 onReady={(player) => {
                   console.log("Player is ready", player);
                 }}
-              />
+              /> */}
+              {videoLink && (
+                <VideoPlayer
+                  options={videoPlayerOptions}
+                  onReady={handlePlayerReady}
+                />
+              )}
             </div>
             <div className="space-y-6">
               <h3 className="text-xl font-semibold">Key Points</h3>

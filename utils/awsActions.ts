@@ -15,21 +15,36 @@ const s3 = new S3Client({
   },
 });
 
-export async function putVideoUrl() {
-  const generateRandomKey = () => crypto.randomUUID();
+export async function putVideoUrl(
+  type: string,
+  key: string,
+  segmentName?: string
+) {
+  if (type === "playlist") {
+    const putObjectCommand = new PutObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: `${key}/playlist`,
+    });
 
-  const key = generateRandomKey();
+    const signedUrl = await getSignedUrl(s3, putObjectCommand, {
+      expiresIn: 60,
+    });
 
-  const putObjectCommand = new PutObjectCommand({
-    Bucket: process.env.AWS_BUCKET_NAME,
-    Key: `${key}.m3u8`,
-  });
+    return { url: signedUrl, key: key };
+  }
+  if (type === "ts") {
+    const putObjectCommand = new PutObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: `${key}/${segmentName}`,
+      ContentType: "video/MP2T",
+    });
 
-  const signedUrl = await getSignedUrl(s3, putObjectCommand, {
-    expiresIn: 60,
-  });
+    const signedUrl = await getSignedUrl(s3, putObjectCommand, {
+      expiresIn: 60,
+    });
 
-  return { url: signedUrl, key: key };
+    return { url: signedUrl };
+  }
 }
 
 export async function getVideoUrl(request: NextRequest) {

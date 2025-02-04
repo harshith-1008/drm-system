@@ -8,7 +8,6 @@ export const POST = async (request: NextRequest) => {
 
     const req = await request.json();
     const { videoId } = req;
-    console.log(videoId);
     if (!videoId) {
       return NextResponse.json(
         { message: "Video ID is required" },
@@ -17,7 +16,7 @@ export const POST = async (request: NextRequest) => {
     }
 
     const video = await Video.findById(videoId);
-    console.log(video);
+
     if (!video) {
       return NextResponse.json({ message: "Video not found" }, { status: 404 });
     }
