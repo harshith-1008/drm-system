@@ -1,33 +1,28 @@
-import { ChevronLeft, Clock, Video, Book } from "lucide-react"
-import { Avatar } from "@/components/ui/avatar"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
+import { ChevronLeft, Clock, Video, Book } from "lucide-react";
+import { Avatar } from "@/components/ui/avatar";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 export default function CourseContent() {
   return (
-    <div className="min-h-screen bg-[#020817] text-white p-6">
+    <div className="min-h-screen bg-[#020817] text-white px-6 py-8">
       {/* Header */}
-      <div className="max-w-7xl mx-auto flex justify-between items-center mb-8">
+      <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4 mb-8">
         <div className="flex items-center gap-4">
           <button className="text-gray-400 hover:text-white transition-colors">
             <ChevronLeft className="h-6 w-6" />
           </button>
-          <div>
-            <h1 className="text-2xl font-semibold">UI/UX Development</h1>
-          </div>
-          <Select defaultValue="week1">
-            <SelectTrigger className="w-[120px] bg-gray-900/50 border-gray-800">
-              <SelectValue placeholder="Select week" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="week1">Week 1</SelectItem>
-              <SelectItem value="week2">Week 2</SelectItem>
-              <SelectItem value="week3">Week 3</SelectItem>
-            </SelectContent>
-          </Select>
+          <h1 className="text-2xl font-semibold">UI/UX Development</h1>
         </div>
+
         <Avatar className="h-12 w-12">
           <img
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-02-04%20at%2012.38.18%E2%80%AFAM-2rZXeu27KVwq6X87jZen8B3fRLy1yc.png"
+            src="https://randomuser.me/api/portraits/men/75.jpg"
             alt="User"
             className="rounded-full"
           />
@@ -35,16 +30,22 @@ export default function CourseContent() {
       </div>
 
       <div className="max-w-7xl mx-auto">
-        <p className="text-gray-400 mb-8">E-Learning Learn anytime, anywhere with our e-learning course.</p>
+        <p className="text-gray-400 mb-6">
+          E-Learning: Learn anytime, anywhere with our e-learning course.
+        </p>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        {/* Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Syllabus Timeline */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             {syllabus.map((topic, index) => (
-              <div key={index} className="relative pl-8 border-l border-gray-800">
-                <div className="absolute left-0 top-0 -translate-x-1/2 h-4 w-4 rounded-full bg-violet-600" />
-                <h3 className="text-xl font-semibold mb-4">{topic.title}</h3>
-                <ul className="space-y-3">
+              <div
+                key={index}
+                className="relative pl-6 border-l border-gray-800"
+              >
+                <div className="absolute left-0 top-1 h-4 w-4 rounded-full bg-violet-600" />
+                <h3 className="text-xl font-semibold mb-3">{topic.title}</h3>
+                <ul className="space-y-2">
                   {topic.items.map((item, i) => (
                     <li key={i} className="text-gray-400">
                       {item}
@@ -55,15 +56,17 @@ export default function CourseContent() {
             ))}
           </div>
 
-          {/* Content Area */}
-          <div className="space-y-8">
+          {/* Course Content */}
+          <div className="space-y-6">
+            {/* Image Section */}
+
             <div className="rounded-lg overflow-hidden">
               <img
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-02-04%20at%2012.38.18%E2%80%AFAM-2rZXeu27KVwq6X87jZen8B3fRLy1yc.png"
+                src="/image3.jpg"
                 alt="UI/UX Design"
-                className="w-full object-cover"
+                className="w-[100%] h-[100%] object-cover aspect-[16/6] rounded-md"
               />
-              <div className="flex justify-between text-sm text-gray-400 mt-4">
+              <div className="flex justify-between text-sm text-gray-400 mt-3">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4" />
                   <span>32hrs</span>
@@ -79,12 +82,15 @@ export default function CourseContent() {
               </div>
             </div>
 
-            {/* Quizzes */}
+            {/* Quizzes Section */}
             <div>
-              <h3 className="text-xl font-semibold mb-6">Quizzes</h3>
+              <h3 className="text-xl font-semibold mb-3">Quizzes</h3>
               <div className="space-y-4">
                 {quizzes.map((quiz, index) => (
-                  <div key={index} className="p-4 rounded-lg bg-gray-900/30 border border-gray-800">
+                  <div
+                    key={index}
+                    className="p-4 rounded-lg bg-gray-900/30 border border-gray-800"
+                  >
                     <h4 className="font-medium mb-2">{quiz.title}</h4>
                     <ul className="space-y-1">
                       {quiz.topics.map((topic, i) => (
@@ -101,9 +107,10 @@ export default function CourseContent() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
+// Syllabus Data
 const syllabus = [
   {
     title: "Introduction to UI/UX",
@@ -141,11 +148,12 @@ const syllabus = [
       "Designing for mobile vs. web",
     ],
   },
-]
+];
 
+// Quizzes Data
 const quizzes = [
   {
-    title: "Quiz_1",
+    title: "Quiz 1",
     topics: [
       "Difference between UI and UX",
       "Key design principles (contrast, alignment, proximity)",
@@ -153,7 +161,7 @@ const quizzes = [
     ],
   },
   {
-    title: "Quiz_2",
+    title: "Quiz 2",
     topics: [
       "Low-fidelity vs. high-fidelity wireframes",
       "Tools for wireframing (Figma, Adobe XD, Sketch)",
@@ -161,11 +169,11 @@ const quizzes = [
     ],
   },
   {
-    title: "Quiz_3",
+    title: "Quiz 3",
     topics: [
       "Web Content Accessibility Guidelines (WCAG)",
       "Importance of usability testing",
       "Designing for different user needs",
     ],
   },
-]
+];

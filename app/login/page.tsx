@@ -16,12 +16,14 @@ export default function LoginForm() {
   const [visitorId, setVisitorId] = useState("");
   const [userId, setUserId] = useState<string>("");
   const [fingerprints, setFingerprints] = useState<string[]>([]);
+  const [isMulti, setIsMulti] = useState(false);
 
   useEffect(() => {
     const fetchFingerprint = async () => {
       const fpPromise = FingerprintJS.load();
       const fp = await fpPromise;
       const result = await fp.get();
+      console.log(result);
       setVisitorId(result.visitorId);
     };
 
@@ -42,29 +44,32 @@ export default function LoginForm() {
           deviceFingerprint: visitorId,
         }),
       });
+
       if (response.status === 200) {
         router.push("/course/1");
       }
+
       if (response.status === 401) {
         const data = await response.json();
         setUserId(data.userId);
         setFingerprints(data.fingerprints);
+        setIsMulti(true);
       }
     } catch (err) {
       console.error("Login error:", err);
     }
   };
 
-  const logoutDevice = async (DeviceFingerprint: string) => {
+  const logoutDevice = async (deviceFingerprint: string) => {
     try {
-      const response = await fetch("/api/user/logout-device", {
+      await fetch("/api/user/logout-device", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           userId: userId,
-          deviceToDelete: DeviceFingerprint,
+          deviceToDelete: deviceFingerprint,
         }),
       });
     } catch (err) {
@@ -83,7 +88,7 @@ export default function LoginForm() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm text-gray-400">
-              email
+              Email
             </label>
             <Input
               id="email"
@@ -130,26 +135,75 @@ export default function LoginForm() {
           </Button>
         </form>
       </div>
-      {userId && (
-        <div>
-          {fingerprints.length > 0 && (
-            <div>
-              {fingerprints.map((fingerprint, id) => (
-                <div
-                  key={id}
-                  className="flex flex-row items-center justify-center"
-                >
-                  <p className="text-white">{fingerprint}</p>
-                  <Button
-                    className="bg-violet-600 hover:bg-violet-500 text-white py-2 rounded-md transition-colors"
-                    onClick={() => logoutDevice(fingerprint)}
+
+      {isMulti && (
+        <div className="flex flex-col w-full h-screen bg-black items-center p-4">
+          <div className="mt-6">
+            {fingerprints.length > 0 && (
+              <div>
+                {fingerprints.map((fingerprint, id) => (
+                  <div
+                    key={id}
+                    className="flex flex-row items-center justify-center gap-4 p-4 border border-gray-700 rounded-lg"
                   >
-                    Logout
-                  </Button>
-                </div>
-              ))}
+                    <p className="text-white">Device ID: {fingerprint}</p>
+                    <Button
+                      className="bg-violet-600 hover:bg-violet-500 text-white py-2 rounded-md transition-colors"
+                      onClick={() => logoutDevice(fingerprint)}
+                    >
+                      Logout
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col items-center mt-10 gap-4 w-full max-w-lg text-center">
+            <p className="text-white font-semibold text-2xl md:text-3xl">
+              Log Out of Other Sessions
+            </p>
+            <p className="text-gray-500 text-sm md:text-base">
+              You are logged in on multiple devices. To ensure account security
+              and optimal performance, please log out from other devices or
+              continue with this session only.
+            </p>
+          </div>
+
+          <div className="flex flex-col w-full max-w-md mt-6 gap-4">
+            <div className="flex items-center gap-4 p-4 border border-gray-700 rounded-lg w-full">
+              <img
+                className="w-12 h-12 rounded-full border border-white"
+                src="/smartphone.png"
+                alt="Smartphone"
+              />
+              <div className="flex flex-col flex-1">
+                <p className="text-white">{fingerprints}</p>
+                <p className="text-gray-400 text-sm">
+                  Miyapur, Hyderabad, Telangana 3 days ago
+                </p>
+              </div>
+              <button className="bg-black text-white border border-white px-4 py-1 text-sm rounded-lg">
+                Log out
+              </button>
             </div>
-          )}
+
+            <div className="flex items-center gap-4 p-4 border border-gray-700 rounded-lg w-full">
+              <img
+                className="w-12 h-12 rounded-full border border-white"
+                src="/laptop.png"
+                alt="Laptop"
+              />
+              <div className="flex flex-col flex-1">
+                <p className="text-white">{fingerprints}</p>
+                <p className="text-gray-400 text-sm">
+                  Miyapur, Hyderabad, Telangana 5 days ago
+                </p>
+              </div>
+              <button className="bg-black text-white border border-white px-4 py-1 text-sm rounded-lg">
+                Log out
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
