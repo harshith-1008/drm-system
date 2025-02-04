@@ -62,6 +62,7 @@ export default function LessonView() {
       {
         src: videoLink,
         type: "application/x-mpegURL",
+        withCredentials: true, // Set to true if your API requires authentication
       },
     ],
   };
@@ -147,8 +148,20 @@ export default function LessonView() {
           <div className="space-y-8">
             <div className="relative bg-violet-700 rounded-lg overflow-hidden h-[18rem]">
               <VideoPlayer
-                options={videoPlayerOptions}
-                onReady={handlePlayerReady}
+                options={{
+                  controls: true,
+                  responsive: true,
+                  fluid: true,
+                  sources: [
+                    {
+                      src: videoLink, // The encrypted M3U8 link
+                      type: "application/x-mpegURL",
+                    },
+                  ],
+                }}
+                onReady={(player) => {
+                  console.log("Player is ready", player);
+                }}
               />
             </div>
             <div className="space-y-6">
