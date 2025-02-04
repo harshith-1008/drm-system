@@ -1,12 +1,13 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IVideo extends Document {
-  courseId: mongoose.Types.ObjectId;
+  courseId?: mongoose.Types.ObjectId;
   title: string;
   bucketLink: string;
-  decryptionLink: string;
+  decryptionCode: string;
   adminId: mongoose.Types.ObjectId;
   encrypted: boolean;
+  iv: String;
 }
 
 const videoSchema: Schema<IVideo> = new Schema({
@@ -17,7 +18,6 @@ const videoSchema: Schema<IVideo> = new Schema({
   courseId: {
     type: Schema.Types.ObjectId,
     ref: "Course",
-    required: true,
   },
   adminId: {
     type: Schema.Types.ObjectId,
@@ -28,12 +28,12 @@ const videoSchema: Schema<IVideo> = new Schema({
     type: String,
     required: true,
   },
-  decryptionLink: {
+  decryptionCode: {
     type: String,
     required: true,
   },
-  encrypted: {
-    type: Boolean,
+  iv: {
+    type: String,
     required: true,
   },
 });

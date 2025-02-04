@@ -41,7 +41,7 @@ export const POST = async (request: NextRequest) => {
 
     const tokenData = {
       id: user._id,
-      email: user._email,
+      email: user.email,
       fingerprint: deviceFingerprint,
     };
 

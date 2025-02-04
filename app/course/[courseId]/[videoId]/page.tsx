@@ -7,12 +7,72 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import Link from "next/link";
+
 export default function LessonView() {
+  const playerRef = useRef(null);
+  const pathname = usePathname();
+  const router = useRouter();
+  const segments = pathname.split("/");
+  const videoId = segments[segments.length - 1] || "";
+  const [videoLink, setVideoLink] = useState<string>();
+  const [videoData, setVideoData] = useState();
+
+  useEffect(() => {
+    const fetchVideo = async () => {
+      try {
+        const res = await fetch(`/api/video/getVideo`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            videoId: videoId,
+          }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          // console.log(data);
+          setVideoData(data.data);
+          setVideoLink(data.data.bucketLink);
+        } else {
+          console.error(data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching video:", error);
+      }
+    };
+
+    if (videoId) fetchVideo();
+  }, [videoId]);
+  // console.log(videoData);
+  const videoPlayerOptions = {
+    controls: true,
+    responsive: true,
+    fluid: true,
+    sources: [
+      {
+        src: videoLink,
+        type: "application/x-mpegURL",
+        withCredentials: true, // Set to true if your API requires authentication
+      },
+    ],
+  };
+  const handlePlayerReady = (player: any) => {
+    playerRef.current = player;
+
+    // player.on("waiting", () => {
+    //   videojs.log("player is waiting");
+    // });
+
+    // player.on("dispose", () => {
+    //   videojs.log("player will dispose");
+    // });
+  };
+
   return (
     <div className="min-h-screen bg-[#020817] text-white p-6">
       {/* Header */}
-      <div className="max-w-7xl mx-auto flex justify-between items-center  mb-8">
+      <div className="max-w-7xl mx-auto flex justify-between items-center mb-8">
         <div className="flex items-center gap-4">
           <button className="text-gray-400 hover:text-white transition-colors ">
             <ChevronLeft className="h-6 w-6" />
@@ -38,14 +98,11 @@ export default function LessonView() {
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Lesson Timeline */}
           <div>
             <h2 className="text-2xl font-semibold mb-6">
               Introduction to UI/UX
             </h2>
-
             <div className="relative">
-              {/* Continuous vertical line */}
               <div className="absolute left-4 top-0 bottom-0 w-px bg-gray-800" />
 
               <div className="space-y-4">
@@ -72,15 +129,23 @@ export default function LessonView() {
               </div>
             </div>
           </div>
-
-          {/* Video and Key Points */}
           <div className="space-y-8">
             <div className="relative bg-violet-700 rounded-lg overflow-hidden">
+              <div className="absolute top-4 left-4 flex items-center gap-2">
+                <Avatar className="h-8 w-8">
+                  <img
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-02-04%20at%2011.43.58%E2%80%AFAM-3n2FuAQu4u3tro7fh9uhFhGct34e29.png"
+                    alt="Instructor"
+                    className="rounded-full"
+                  />
+                </Avatar>
+                <span className="text-sm">Sai Harshith</span>
+              </div>
               <div className="absolute top-4 right-4 bg-black/50 px-3 py-1 rounded-full text-sm">
                 Learn UI/UX design essentials
               </div>
               <img
-                src="/modda2.jpg"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-02-04%20at%2011.43.58%E2%80%AFAM-3n2FuAQu4u3tro7fh9uhFhGct34e29.png"
                 alt="Course Video"
                 className="w-full aspect-video object-cover"
               />
@@ -100,7 +165,6 @@ export default function LessonView() {
                 </div>
               </div>
             </div>
-
             <div className="space-y-6">
               <h3 className="text-xl font-semibold">Key Points</h3>
               <ul className="space-y-4 text-gray-400">

@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import ffmpeg from "@/utils/ffmpeg";
+import Video from "@/models/video";
+import bcryptjs from "bcryptjs";
+import { getJwtData } from "@/utils/getJwtData";
 
 export const config = {
   api: {
@@ -13,7 +16,16 @@ export const config = {
 export const POST = async (request: NextRequest) => {
   try {
     const formData = await request.formData();
+    const title = formData.get("title");
     const file = formData.get("file") as File | null;
+    const user = await getJwtData(request);
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not registered." },
+        { status: 400 }
+      );
+    }
 
     if (!file) {
       return NextResponse.json({ error: "No file found." }, { status: 400 });
@@ -29,58 +41,96 @@ export const POST = async (request: NextRequest) => {
     const encryptionKey = `encryption-key-${timestamp}.key`;
     const keyPath = path.join("/tmp", encryptionKey);
 
-    const encryptionKeyValue = "0123456789abcdef";
-    fs.writeFileSync(keyPath, encryptionKeyValue);
-
-    const iv = "1234567890abcdef";
+    const encryptionKeyValue = process.env.ENCRYPTION_KEY_VALUE;
+    const salt = await bcryptjs.genSalt(10);
+    let hashedEncryptionKey;
+    if (encryptionKeyValue) {
+      fs.writeFileSync(keyPath, encryptionKeyValue);
+      hashedEncryptionKey = await bcryptjs.hash(encryptionKeyValue, salt);
+    }
+    const iv = process.env.IV;
 
     const keyInfoPath = path.join("/tmp", "key_info.txt");
-    const keyInfoContent = `key.key\nfile:${keyPath}\n${iv}`;
+    const keyInfoContent = `http://localhost:3000/api/get-keys\nfile:${keyPath}\n${iv}`;
     fs.writeFileSync(keyInfoPath, keyInfoContent);
-
-    console.log("key_info.txt content:", keyInfoContent);
 
     const encryptedPath = path.join("/tmp", `encrypted-${timestamp}.m3u8`);
     const segmentPath = path.join("/tmp", `segment-%03d.ts`);
 
     if (!fs.existsSync(keyInfoPath)) {
-      console.error(`Key info file does not exist at path: ${keyInfoPath}`);
-    } else {
-      console.log(`Key info file found at path: ${keyInfoPath}`);
+      return NextResponse.json(
+        { error: "Key info file does not exist at path." },
+        { status: 400 }
+      );
     }
 
+    const WatermarkText = "Hello";
+    const generateRandomKey = () => crypto.randomUUID();
+    const key2 = generateRandomKey();
     await new Promise<void>((resolve, reject) => {
       ffmpeg(inputPath)
         .outputOptions("-c:v libx264")
         .outputOptions("-preset ultrafast")
+        .outputOptions(
+          `-vf drawtext=text='${WatermarkText.replace(
+            /'/g,
+            "\\'"
+          )}':fontfile='/System/Library/Fonts/HelveticaNeue.ttc':fontcolor=white:fontsize=24:x=10:y=10`
+        )
         .outputOptions("-f hls")
         .outputOptions("-hls_time 10")
         .outputOptions("-hls_list_size 0")
         .outputOptions(`-hls_key_info_file ${keyInfoPath}`)
         .outputOptions(`-hls_segment_filename ${segmentPath}`)
         .output(encryptedPath)
+        .on("stderr", (line) => console.log("stderr:", line))
         .on("end", () => resolve())
         .on("error", (err) => reject(err))
         .run();
     });
 
-    const encryptedBuffer = fs.readFileSync(encryptedPath);
+    // Upload .ts files
+    const tsFiles = fs
+      .readdirSync("/tmp")
+      .filter((file) => file.startsWith("segment-") && file.endsWith(".ts"));
+    console.log("TS Files Found:", tsFiles);
+    for (const tsFile of tsFiles) {
+      const tsBuffer = fs.readFileSync(path.join("/tmp", tsFile));
+      const { url } = await putVideoUrl("ts", key2, tsFile);
+      await fetch(url!, {
+        method: "PUT",
+        body: tsBuffer,
+      });
+    }
 
-    const { url } = await putVideoUrl(request);
+    const encryptedBuffer = fs.readFileSync(encryptedPath);
+    const { url } = await putVideoUrl("playlist", key2);
 
     await fetch(url!, {
       method: "PUT",
       body: encryptedBuffer,
     });
 
+    const newVideo = await Video.create({
+      title: title,
+      adminId: user.id,
+      bucketLink: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_BUCKET_REGION}.amazonaws.com/${key2}/playlist`,
+      decryptionCode: encryptionKeyValue,
+      iv: iv,
+    });
+
+    // Clean up
     fs.rmSync(inputPath, { force: true });
     fs.rmSync(keyPath, { force: true });
     fs.rmSync(keyInfoPath, { force: true });
     fs.rmSync(encryptedPath, { force: true });
+    tsFiles.forEach((file) =>
+      fs.rmSync(path.join("/tmp", file), { force: true })
+    );
 
     return NextResponse.json(
       {
-        message: `https://${process.env.AWS_BUCKET_NAME}.s3.amazonaws.com/encrypted-video`,
+        message: "Video created successfully.",
       },
       { status: 200 }
     );

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import User from "@/models/user";
+import connectDb from "./connnectDb";
 
 interface TokenDecoded extends JwtPayload {
   id: string;
@@ -9,28 +10,28 @@ interface TokenDecoded extends JwtPayload {
 }
 
 export const getJwtData = async (request: NextRequest) => {
+  await connectDb();
   try {
     const token = request.cookies.get("accessToken")?.value || "";
     const decodedToken = jwt.verify(
       token,
       process.env.TOKEN_SECRET!
-    ) as JwtPayload;
+    ) as TokenDecoded;
 
     if (
-      typeof decodedToken === "object" &&
       decodedToken &&
       "id" in decodedToken &&
       "email" in decodedToken &&
       "fingerprint" in decodedToken
     ) {
-      const tokenData = decodedToken as TokenDecoded;
       const user = await User.findById(decodedToken.id);
-      if (user && user.fingerprint.includes(decodedToken.fingerprint)) {
-        return tokenData;
-      } else {
-        const response = NextResponse.redirect("/login");
-        response.cookies.delete("accessToken");
-        return response;
+
+      if (!user.fingerprint || user.fingerprint.length === 0) {
+        return decodedToken;
+      }
+
+      if (user.fingerprint.includes(decodedToken.fingerprint)) {
+        return decodedToken;
       }
     }
 
