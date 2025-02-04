@@ -1,4 +1,6 @@
-export default function AuthLanding() {
+"use client";
+
+export default function Home() {
   return (
     <div className="min-h-screen bg-[#020817] flex flex-col items-center justify-center px-4">
       <h1 className="text-4xl md:text-6xl font-bold text-center mb-4">
@@ -13,11 +15,13 @@ export default function AuthLanding() {
       </p>
 
       <div className="flex gap-4">
-        <button className="px-6 py-2 bg-white text-black rounded-md hover:bg-gray-100 transition-colors">Login</button>
+        <button className="px-6 py-2 bg-white text-black rounded-md hover:bg-gray-100 transition-colors">
+          Login
+        </button>
         <button className="px-6 py-2 border border-gray-700 text-white rounded-md hover:bg-gray-800 transition-colors">
           Sign up
         </button>
       </div>
     </div>
-  )
+  );
 }

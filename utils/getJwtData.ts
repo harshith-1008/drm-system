@@ -1,5 +1,6 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import jwt, { JwtPayload } from "jsonwebtoken";
+import User from "@/models/user";
 
 interface TokenDecoded extends JwtPayload {
   id: string;
@@ -23,7 +24,14 @@ export const getJwtData = async (request: NextRequest) => {
       "fingerprint" in decodedToken
     ) {
       const tokenData = decodedToken as TokenDecoded;
-      return tokenData;
+      const user = await User.findById(decodedToken.id);
+      if (user && user.fingerprint.includes(decodedToken.fingerprint)) {
+        return tokenData;
+      } else {
+        const response = NextResponse.redirect("/login");
+        response.cookies.delete("accessToken");
+        return response;
+      }
     }
 
     throw new Error("Token payload does not match expected format");

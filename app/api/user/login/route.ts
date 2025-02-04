@@ -8,8 +8,7 @@ export const POST = async (request: NextRequest) => {
   try {
     await connectDb();
     const req = await request.json();
-    const { email, password } = req;
-
+    const { email, password, deviceFingerprint } = req;
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -25,16 +24,29 @@ export const POST = async (request: NextRequest) => {
       return NextResponse.json({ error: "Wrong password." }, { status: 400 });
     }
 
-    const tokenData = {
-      id: user._id,
-      email: user._email,
-    };
+    if (user.fingerprints.length >= 2) {
+      return NextResponse.json(
+        {
+          message: "Device limit reached",
+          userId: user._id,
+          fingerprints: user.fingerprints,
+        },
+        { status: 401 }
+      );
+    }
 
     if (!process.env.TOKEN_SECRET) {
       throw new Error("TOKEN_SECRET is not defined");
     }
 
+    const tokenData = {
+      id: user._id,
+      email: user._email,
+      fingerprint: deviceFingerprint,
+    };
+
     const token = jwt.sign(tokenData, process.env.TOKEN_SECRET);
+
     const response = NextResponse.json(
       { message: token }, //"User logged in successfully."
       { status: 200 }
@@ -45,10 +57,15 @@ export const POST = async (request: NextRequest) => {
       maxAge: 60 * 60 * 24 * 3,
     });
 
+    if (!user.fingerprints.includes(deviceFingerprint)) {
+      user.fingerprints.push(deviceFingerprint);
+      await user.save();
+    }
+
     return response;
   } catch (error) {
     const errorMessage =
-      error instanceof Error ? error.message : "An unknown error occured.";
+      error instanceof Error ? error.message : "An unknown error occurred.";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 };

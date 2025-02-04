@@ -2,8 +2,7 @@ import mongoose, { Document, Schema } from "mongoose";
 
 export interface IUser extends Document {
   email: string;
-  fingerprint1?: string;
-  fingerprint2?: string;
+  fingerprints?: [string, string];
   role: "admin" | "user";
   accessToken?: string;
   password: string;
@@ -12,8 +11,9 @@ export interface IUser extends Document {
 const userSchema: Schema<IUser> = new Schema(
   {
     email: { type: String, required: true, unique: true },
-    fingerprint1: { type: String },
-    fingerprint2: { type: String },
+    fingerprints: {
+      type: [String, String],
+    },
     role: {
       type: String,
       required: true,
