@@ -14,21 +14,22 @@ export default function CoursesDashboard() {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+          <div className=" ">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5 " />
             <Input
               placeholder="Search courses"
               className="w-[300px] pl-10 bg-gray-900/50 border-gray-800 text-white placeholder:text-gray-500"
             />
           </div>
-          <Avatar className="h-12 w-12">
+         
+        </div>
+        <Avatar className="h-12 w-12">
             <AvatarImage
               src="https://randomuser.me/api/portraits/men/75.jpg"
               alt="User"
             />
             <AvatarFallback>DN</AvatarFallback>
           </Avatar>
-        </div>
       </div>
 
       {/* Course Section */}
@@ -224,18 +225,60 @@ export default function CoursesDashboard() {
 
 const courses = [
   {
-    title: "E-Learning Learn anytime, anywhere with our e-learning course.",
+    title: "E-Learning Learn anytime, anywhere with our e-learning.",
     image:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-02-04%20at%2012.36.29%E2%80%AFAM-DxxgErrHdnSZLAXjYwUnZXmB6GzLKa.png",
+      "./EL.jpeg",
     instructor: {
       name: "Sai Harshith",
       avatar:
         "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-02-04%20at%2012.36.29%E2%80%AFAM-DxxgErrHdnSZLAXjYwUnZXmB6GzLKa.png",
     },
     progress: 75,
+    duration: "24hrs",
+    videos: "7+",
+    lessons: "15",
+  },
+  {
+    title: "Excel Mastery Simplify data & boost productivity with our Excel.",
+    image:
+      "./EX.jpeg",
+    instructor: {
+      name: "Sai Harshith",
+      avatar:
+        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-02-04%20at%2012.36.29%E2%80%AFAM-DxxgErrHdnSZLAXjYwUnZXmB6GzLKa.png",
+    },
+    progress: 45,
     duration: "32hrs",
     videos: "8+",
     lessons: "25",
+  },
+  {
+    title: "Code smarter & build projects with our Python course.",
+    image:
+      "./EM.jpeg",
+    instructor: {
+      name: "Sai Harshith",
+      avatar:
+        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-02-04%20at%2012.36.29%E2%80%AFAM-DxxgErrHdnSZLAXjYwUnZXmB6GzLKa.png",
+    },
+    progress: 90,
+    duration: "12hrs",
+    videos: "5+",
+    lessons: "20",
+  },
+  {
+    title: "Grow your brand & reach more customers with our course.",
+    image:
+      "./EB.jpeg",
+    instructor: {
+      name: "Sai Harshith",
+      avatar:
+        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-02-04%20at%2012.36.29%E2%80%AFAM-DxxgErrHdnSZLAXjYwUnZXmB6GzLKa.png",
+    },
+    progress: 20,
+    duration: "25hrs",
+    videos: "9+",
+    lessons: "26",
   },
   // Add more courses as needed...
 ];
