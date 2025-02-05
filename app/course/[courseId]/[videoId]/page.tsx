@@ -78,29 +78,70 @@ export default function LessonView() {
   };
 
   useEffect(() => {
-    const disableRightClick = (event: MouseEvent) => event.preventDefault();
-    const disableShortcuts = (event: KeyboardEvent) => {
+    const disableRightClick = (event: any) => event.preventDefault();
+
+    const disableShortcuts = (event: any) => {
+      const key = event.key.toLowerCase();
+
+      if (event.metaKey || event.ctrlKey) {
+        event.preventDefault();
+        return false;
+      }
+
       if (
-        event.ctrlKey &&
-        (event.key === "u" ||
-          event.key === "s" ||
-          event.key === "i" ||
-          event.key === "j" ||
-          event.key === "c")
+        (event.metaKey && event.altKey) ||
+        (event.metaKey && event.shiftKey) ||
+        (event.ctrlKey && event.shiftKey)
       ) {
         event.preventDefault();
+        return false;
       }
-      if (event.key === "F12") {
+
+      if (event.key.match(/^f\d+$/i)) {
         event.preventDefault();
+        return false;
       }
     };
 
+    const detectDevTools = () => {
+      const widthThreshold = window.outerWidth - window.innerWidth > 160;
+      const heightThreshold = window.outerHeight - window.innerHeight > 160;
+
+      if (widthThreshold || heightThreshold) {
+        alert("Developer tools detected! Access denied.");
+        window.location.reload();
+      }
+
+      const start = performance.now();
+      debugger;
+      const end = performance.now();
+
+      if (end - start > 100) {
+        alert("Developer tools detected! Access denied.");
+        window.location.reload();
+      }
+    };
+
+    const preventCopyPaste = (e: any) => {
+      e.preventDefault();
+      return false;
+    };
+
     document.addEventListener("contextmenu", disableRightClick);
-    document.addEventListener("keydown", disableShortcuts);
+    document.addEventListener("keydown", disableShortcuts, true);
+    document.addEventListener("copy", preventCopyPaste);
+    document.addEventListener("paste", preventCopyPaste);
+    document.addEventListener("cut", preventCopyPaste);
+
+    const devToolsInterval = setInterval(detectDevTools, 500);
 
     return () => {
       document.removeEventListener("contextmenu", disableRightClick);
-      document.removeEventListener("keydown", disableShortcuts);
+      document.removeEventListener("keydown", disableShortcuts, true);
+      document.removeEventListener("copy", preventCopyPaste);
+      document.removeEventListener("paste", preventCopyPaste);
+      document.removeEventListener("cut", preventCopyPaste);
+      clearInterval(devToolsInterval);
     };
   }, []);
 
